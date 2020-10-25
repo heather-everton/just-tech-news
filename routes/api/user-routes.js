@@ -1,6 +1,7 @@
 const router = require('express').Router();
-const { User } = require('../../models');
 const { Op } = require("sequelize");
+const { User, Post, Vote, Comment } = require("../../models");
+
 
 
 // GET /api/users
@@ -8,13 +9,12 @@ router.get('/', (req, res) => {
     // Access our User model and run .findAll() method)
     User.findAll({
       attributes: { exclude: ['password'] },
-      where: {id: {[Op.lte]: 10}}
     })
-      .then(dbUserData => res.json(dbUserData))
-      .catch(err => {
-        console.log(err);
-        res.status(500).json(err);
-      });
+    .then(dbUserData => res.json(dbUserData))
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
     
 });
   
@@ -24,7 +24,28 @@ router.get('/:id', (req, res) => {
     attributes: { exclude: ['password'] },
     where: {
       id: req.params.id
-    }
+    },
+    include: [
+      {
+        model: Post,
+        attributes: ['id', 'title', 'post_url', 'created_at']
+      },
+      // include the Comment model here:
+      {
+        model: Comment,
+        attributes: ['id', 'comment_text', 'created_at'],
+        include: {
+          model: Post,
+          attributes: ['title']
+        }
+      },
+      {
+        model: Post,
+        attributes: ['title'],
+        through: Vote,
+        as: 'voted_posts'
+      }
+    ]
   })
     .then(dbUserData => {
       if (!dbUserData) {

@@ -34,6 +34,6 @@ Vote.init(
       underscored: true,
       modelName: 'vote'
     }
-  );  
+);  
 
 module.exports = Vote;
