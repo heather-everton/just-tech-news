@@ -84,29 +84,39 @@ router.post('/', (req, res) => {
       });
 });
 
-router.post('/login', (req, res) => {
-  // expects {email: 'lernantino@gmail.com', password: 'password1234'}
+router.post('/login', (req,res) => {
+  // expects {email: 'email', password: 'password'}
   User.findOne({
-    where: {
-      email: req.body.email
-    }
-  }).then(dbUserData => {
-    if (!dbUserData) {
-      res.status(400).json({ message: 'No user with that email address!' });
-      return;
-    }
+      where: {
+          email: req.body.email
+      }
+  })
+  .then(dbUserData => {
+      // checks for a matching email
+      if (!dbUserData) {
+          res.status(400).json({ message: 'No user with that email address!' });
+          return;
+      };
 
-    const validPassword = dbUserData.checkPassword(req.body.password);
-    if (!validPassword) {
-      res.status(400).json({ message: 'Incorrect password!' });
-      return;
-    }
+      // checks that given password matches the hashed password in the db
+      const validPassword = dbUserData.checkPassword(req.body.password);
+      if (!validPassword) {
+          res.status(400).json({ message: 'Incorrect password!' });
+          return;
+      };
 
-    res.json({ user: dbUserData, message: 'You are now logged in!' });
+      req.session.save(() => {
+          // declare session variables
+          req.session.user_id = dbUserData.id;
+          req.session.username = dbUserData.username;
+          req.session.loggedIn = true;
+
+          res.json({ user: dbUserData, message: 'You are now logged in!' });
+      })
   });
 });
 
-router.post('/logout', (req, res) => {
+router.post('/logout', (req, res) => {  
   if (req.session.loggedIn) {
     req.session.destroy(() => {
       res.status(204).end();
