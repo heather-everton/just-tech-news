@@ -4,14 +4,6 @@ module.exports = {
       date
     ).getFullYear()}`;      
   },
-    
-  format_plural: (word, count) => {
-    if (count === 1) {
-        return word.toLowerCase();
-    } else {
-        return `${word.toLowerCase()}s`
-    }
-  },
   format_url: url => {
     return url
     .replace('http://', '')
@@ -19,6 +11,13 @@ module.exports = {
     .replace('www.', '')
     .split('/')[0]
     .split('?')[0];
-  }  
+  },
+  format_plural: (word, count) => {
+    if (count === 1) {
+        return word.toLowerCase();
+    } else {
+        return `${word.toLowerCase()}s`
+    }
+  }
 }
   
